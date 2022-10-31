@@ -22,7 +22,7 @@ details = [data]
 # print(details)
 data_df = pd.DataFrame(data)
 print(data_df.head())
-data_df.to_csv('properties.csv', index=False, mode='a', header=False)
+data_df.to_csv('data.csv', index=False, mode='a', header=False)
 
 
 
