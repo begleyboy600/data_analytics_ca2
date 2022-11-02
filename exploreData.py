@@ -1,13 +1,23 @@
-# have to process zip code data
-# then data exploration and visualisation
+"""
+Business Case
+
+"""
+# have to process zip code data - done
+# then data exploration and visualisation - done
 # then business case at top of file
+# save all visualization as images
+# clean up file
 
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 import os
+from folium import plugins
 from matplotlib.pyplot import figure
+import folium
+from folium.plugins import HeatMap
+from keplergl import KeplerGl
 
 # Shows max rows and columns in pandas dataframe when being displayed
 pd.set_option('display.max_columns', None)
@@ -48,13 +58,10 @@ data = pd.read_csv("data.csv")
  17  lot_size         818 non-null    float64
  18  latitude         2158 non-null   float64
  19  longitude        2158 non-null   float64
-dtypes: float64(7), int64(4), object(9)
-memory usage: 337.3+ KB
-None
 """
 
 # prints out the count, mean, std, min, max, 25%, 50%, 75%, and max for every numerical column in the dataframe
-# print(data.describe())
+print(data.describe())
 
 # DATA CLEANING
 # prints out all unique vales in zip code, cities, county, state, neighborhood, type, baths, bed in dataframe
@@ -78,7 +85,7 @@ data = data.drop(data[data.baths.isnull()].index)
 data = data.drop(data[data.beds.isnull()].index)
 data = data.drop(data[data.list_price.isnull()].index)
 
-# print(data.isnull().sum())
+print(data.isnull().sum())
 
 # prints out number of rows in the dataframe
 print("number of rows in dataframe: ", len(data.index))
@@ -117,7 +124,6 @@ print("unique neighborhood names: ", data.NeighborhoodName.unique())
 data.drop(['neighborhood'], axis=1, inplace=True)
 # print(data.head())
 
-
 zip_code_mapper = {33160: 1, 33154: 2, 33141: 3, 33140: 4, 33139: 5, 33035: 6, 33034: 7, 33189: 8,
                    33186: 9, 33133: 10, 33185: 11, 33175: 12, 33129: 13, 33131: 14, 33132: 15, 33136: 16,
                    33128: 17, 33130: 18, 33126: 19, 33178: 20, 33182: 21, 33166: 22, 33010: 23, 33013: 24,
@@ -129,7 +135,6 @@ print("unique zip_codes names: ", data.ZipCodeName.unique())
 # drop zip_code column
 data.drop(['zip_code'], axis=1, inplace=True)
 # print(data.head())
-
 
 # Status column has 4 unique columns: ['inactive' 'Active' 'Pending' 'public-record']. I will create 3 new columns and convert status variable to binary (1 or 0)
 # 1 means property is inactive and 0 means it is not
@@ -187,7 +192,7 @@ data.drop(['sqft'], axis=1, inplace=True)
 data.drop(['neighborhood_id'], axis=1, inplace=True)
 
 # drops the address column because it's not important
-data.drop(['address'], axis=1, inplace=True)
+# data.drop(['address'], axis=1, inplace=True)
 
 # drops the id column because it's not important
 data.drop(['id'], axis=1, inplace=True)
@@ -195,19 +200,9 @@ data.drop(['id'], axis=1, inplace=True)
 # drops the type column because it's not important
 data.drop(['type'], axis=1, inplace=True)
 
-print(data.head())
-"""
-# prints out all unique vales in zip code, cities, county, state, neighborhood, type, baths, bed in dataframe
-print("unique zip codes: ", data.zip_code.unique())
-print("unique baths: ", data.baths.unique())
-print("unique beds: ", data.beds.unique())
-print("unique is_foreclosuree: ", data.is_foreclosure.unique())
-
 # prints out if there is any null values
 print(pd.isnull(data).sum())
-"""
 
-"""
 # Outliers
 # boxplot of baths column in dataframe
 figure(num=None, figsize=(8, 6), dpi=80, facecolor='w', edgecolor='k')
@@ -238,10 +233,8 @@ figure(num=None, figsize=(8, 6), dpi=80, facecolor='w', edgecolor='k')
 plt.title("Boxplot of list_price column")
 sns.boxplot(x=data.ZipCodeName)
 plt.show()
-"""
 
-# Exploratory data analysis - univariate analysis
-"""
+# Exploratory data analysis - univariate analysis (ALL VISUALIZATIONS ARE SAVE IN data_visualizations DIRECTORY.)
 # data visualization for baths column
 number_baths = data.baths.value_counts()  # Gives a pandas series
 number_baths.plot.bar()
@@ -287,7 +280,6 @@ plt.xlabel("Number Of City_Names")
 plt.ylabel("Number Of Properties")
 plt.show()
 
-
 # data visualization for CountyName column
 county_labels = ['MIAMI-DADE COUNTY', 'MIAMI-DADE', 'Miami-Dade', 'OTHER', 'Miami-Dade County', 'DADE']
 default_county_ticks = range(len(county_labels))
@@ -305,9 +297,7 @@ number_county_names_pie.plot.pie(radius=2200, frame=True, autopct='%.0f%%')
 plt.legend(county_mapper, loc='upper right')
 plt.title("Pie Chart Of County_Names Column")
 plt.show()
-"""
 
-"""
 # data visualization for NeighborhoodName column
 neighborhood_labels = ['Upper Eastside', 'Brickell', 'Overtown', 'Downtown Miami',
                        'North-East Coconut Grove', 'Miami Islands', 'San Marco Island', 'Coral Way',
@@ -330,10 +320,8 @@ number_county_names_pie.plot.pie(radius=2200, frame=True, autopct='%.0f%%')
 plt.legend(neighborhood_mapper, loc='upper right')
 plt.title("Pie Chart Of Neighborhood_Names Column")
 plt.show()
-"""
 
-# Exploratory data analysis - bivariate analysis
-
+# Exploratory data analysis - bivariate analysis (ALL VISUALIZATIONS ARE SAVE IN data_visualizations DIRECTORY.)
 # data for beds and price column
 figure(num=None, figsize=(8, 8), dpi=80, facecolor='w', edgecolor='k')
 plt.scatter(data.beds, data.list_price)
@@ -358,12 +346,97 @@ plt.show()
 correlation2 = np.corrcoef(data.baths, data.list_price)
 print("correlation of baths and price: ", correlation2)
 
-# Exploratory data analysis - multivariate analysis
+# Exploratory data analysis - multivariate analysis (ALL VISUALIZATIONS ARE SAVE IN data_visualizations DIRECTORY.)
 # heatmap of all variables in dataframe
 figure(num=None, figsize=(10, 8), dpi=80, facecolor='w', edgecolor='k')
 sns.heatmap(data.corr(), annot=True, cmap='Reds')
 plt.show()
 
-# geospatial visualization
+# Geospatial visualization (PLEASE NOTE THAT ALL HTML FILES WITH VISUALIZATIONS ARE IN THE html_files DIRECTORY AND
+# SAVING THE MAPS COMMAND IS COMMENTED. BUT FEEL FREE TO UNCOMMENT AND RUN YOURSELF)
+map = folium.Map(location=[data.latitude.mean(), data.longitude.mean()], zoom_start=12, control_scale=True)
+data['latitude'] = data['latitude'].astype(np.float)
+data['longitude'] = data['longitude'].astype(np.float)
+for index, row in data.iterrows():
+    folium.CircleMarker((row.latitude, row.longitude), popup=f"address: {row.address}", radius=6, color="#3186cc", fill=True,
+                        fill_color="#3186cc").add_to(map)
+# map.save('geospatial_data_visualization.html')
+
+map2 = folium.Map(location=[data.latitude.mean(), data.longitude.mean()], zoom_start=12, control_scale=True)
+for index, row in data.iterrows():
+    folium.CircleMarker((row.latitude, row.longitude), popup=f"address: {row.address}", radius=2, weight=2, color='red',
+                        fill_color='red', fill_opacity=.5).add_to(map2)
+heat_data = [[row['latitude'], row['longitude']] for index, row in data.iterrows()]
+hm = HeatMap(heat_data, min_opacity=0.4, blur=18)
+map2.add_child(plugins.HeatMap(data=heat_data, radius=25, blur=10))
+# map2.save('geospatial_heatmap_data_visualization.html')
+
+custom_config = {
+  "version": "v1",
+  "config": {
+    "visState": {
+      "filters": [],
+      "layers": [],
+      "interactionConfig": {}
+    },
+    "mapState": {
+      "bearing": -4.928571428571431,
+      "dragRotate": True,
+      "latitude": 25.77062694667296,
+      "longitude": -80.23216984426615,
+      "pitch": 49.18440507924836,
+      "zoom": 10.655984704565685,
+      "isSplit": False
+    },
+    "mapStyle": {
+      "styleType": "muted_night",
+      "topLayerGroups": {},
+      "visibleLayerGroups": {
+        "label": False,
+        "road": False,
+        "border": False,
+        "building": False,
+        "water": True,
+        "land": True
+      }
+    }
+  }
+}
+
+kepler_map = KeplerGl(height=500)
+kepler_map.add_data(data=data, name='Miami Property Data')
+kepler_map.config = custom_config
+# kepler_map.save_to_html(file_name="html_files/keplerDataVisualizationBaseMap.html")
+
+print(data.head())
+print(data.info())
+"""
+UPDATED DATAFRAME 
+ #   Column                       Non-Null Count  Dtype  
+---  ------                       --------------  -----  
+ 0   address                      2119 non-null   object 
+ 1   state                        2119 non-null   object 
+ 2   baths                        2119 non-null   float64
+ 3   beds                         2119 non-null   float64
+ 4   list_price                   2119 non-null   float64
+ 5   is_foreclosure               2119 non-null   int64  
+ 6   latitude                     2119 non-null   float64
+ 7   longitude                    2119 non-null   float64
+ 8   CityName                     2119 non-null   int64  
+ 9   CountyName                   2119 non-null   int64  
+ 10  NeighborhoodName             2119 non-null   int64  
+ 11  ZipCodeName                  2119 non-null   int64  
+ 12  StatusInactive               2119 non-null   int32  
+ 13  StatusActive                 2119 non-null   int32  
+ 14  StatusPending                2119 non-null   int32  
+ 15  StatusPublicRecord           2119 non-null   int32  
+ 16  TypeCondo/Coop               2119 non-null   int32  
+ 17  TypeSingleFamilyResidential  2119 non-null   int32  
+ 18  TypeMulti Family             2119 non-null   int32  
+ 19  TypeOther                    2119 non-null   int32  
+ 20  TypeTownhouse                2119 non-null   int32  
+ 21  TypeCondo/Co-op              2119 non-null   int32  
+ 22  TypeGarage                   2119 non-null   int32  
+"""
 
 
