@@ -1,0 +1,18 @@
+CITY LEGEND
+{'Miami': 1, 'Miami Beach': 2, 'Coconut Grove': 3, 'Coral Gables': 4, 'Doral': 5, 'Hialeah': 6}
+
+COUNTY LEGEND
+{'MIAMI-DADE COUNTY': 1, 'MIAMI-DADE': 2, 'Miami-Dade': 3, 'OTHER': 4, 'Miami-Dade County': 5, 'DADE': 6}
+
+NEIGHBORHOOD NAMES LEGEND
+{'Upper Eastside': 1, 'Brickell': 2, 'Overtown': 3, 'Downtown Miami': 4, 'North-East Coconut Grove': 5,
+ 'Miami Islands': 6, 'San Marco Island': 7, 'Coral Way': 8, 'Watson Island': 9, 'Little Haiti': 10,
+ 'Biscayne Island': 11, 'Liberty City': 12, 'Wynwood - Edgewater': 13, 'South-West Coconut Grove': 14, 'Allapattah': 15,
+ 'Coral Gables': 16, 'Fair Isle': 17, 'Douglas Park': 18, 'Flagami': 19, 'Shenandoah': 20, 'Little Havana': 21,
+ 'Alameda - West Flagler': 22, 'North Bayfront': 23, 'Virginia Key': 24}
+
+ZIP CODE LEGEND
+{33160: 1, 33154: 2, 33141: 3, 33140: 4, 33139: 5, 33035: 6, 33034: 7, 33189: 8, 33186: 9, 33133: 10, 33185: 11,
+ 33175: 12, 33129: 13, 33131: 14, 33132: 15, 33136: 16, 33128: 17, 33130: 18, 33126: 19, 33178: 20, 33182: 21,
+ 33166: 22, 33010: 23, 33013: 24, 33018: 25, 33169: 26, 33138: 27, 33161: 28, 33181: 29, 33149: 30}
+

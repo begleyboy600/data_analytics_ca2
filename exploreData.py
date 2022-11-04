@@ -1,6 +1,8 @@
 """
 Business Case
-
+The main goal of my project is for real estate agents price client real estate appropriately by predicting the price of
+a property by using variables that are relevant to the property. Another goal for this project is for real estate agents
+to be able to understand which feature (data variable) affect the price of a property
 """
 # have to process zip code data - done
 # then data exploration and visualisation - done
@@ -18,6 +20,7 @@ from matplotlib.pyplot import figure
 import folium
 from folium.plugins import HeatMap
 from keplergl import KeplerGl
+import operator
 
 # Shows max rows and columns in pandas dataframe when being displayed
 pd.set_option('display.max_columns', None)
@@ -205,98 +208,130 @@ print(pd.isnull(data).sum())
 
 # Outliers
 # boxplot of baths column in dataframe
-figure(num=None, figsize=(8, 6), dpi=80, facecolor='w', edgecolor='k')
-plt.title("Boxplot of baths column")
-sns.boxplot(x=data.baths)
+figure(num=None, figsize=(20, 10), dpi=80, facecolor='w', edgecolor='k')
+plt.title("Boxplot Of Number Of Baths In Each Property", fontsize=22)
+plt.xlabel("baths", fontsize=14)
+sns.boxplot(x=data.baths, color='#2CBDFE')
 plt.show()
+# Summary: Most properties have between 2 and 4 bathrooms. One property has 40 bathrooms which is an outlier
 
 # boxplot of beds column in dataframe
-figure(num=None, figsize=(8, 6), dpi=80, facecolor='w', edgecolor='k')
-plt.title("Boxplot of beds column")
-sns.boxplot(x=data.beds)
+figure(num=None, figsize=(20, 10), dpi=80, facecolor='w', edgecolor='k')
+plt.title("Boxplot Of Number Of Beds In Each Property", fontsize=22)
+sns.boxplot(x=data.beds, color='#2CBDFE')
+plt.xlabel("beds", fontsize=14)
 plt.show()
+# Summary: Most properties have between 2 and 4 bedrooms. One property has 40 bedrooms and another one with 20 bedrooms, these properties are seen as an outlier
 
 # boxplot of list_price column in dataframe
-figure(num=None, figsize=(8, 6), dpi=80, facecolor='w', edgecolor='k')
-plt.title("Boxplot of list_price column")
-sns.boxplot(x=data.list_price)
+figure(num=None, figsize=(20, 10), dpi=80, facecolor='w', edgecolor='k')
+plt.title("Boxplot Of Price For Each Property", fontsize=22)
+plt.ticklabel_format(style='plain')
+plt.xlabel("prices", fontsize=14)
+sns.boxplot(x=data.list_price, color='#2CBDFE')
 plt.show()
+# Summary: Majority of the properties are listed for less than 5 million. However there is a few outliers. With one property being listed at 35 million
 
 # boxplot of NeighborhoodName column in dataframe
-figure(num=None, figsize=(8, 6), dpi=80, facecolor='w', edgecolor='k')
-plt.title("Boxplot of NeighborhoodName column")
-sns.boxplot(x=data.NeighborhoodName)
+figure(num=None, figsize=(20, 10), dpi=80, facecolor='w', edgecolor='k')
+plt.title("Boxplot Of neighborhood Names For Each Property", fontsize=22)
+sns.boxplot(x=data.NeighborhoodName, color='#2CBDFE')
+plt.xlabel("neighborhood names", fontsize=14)
+plt.show()
+# Summary: Majority of properties are in neighborhoods between 2 and 19. NOTE PLEASE SEE variable legend TEXT FILE TO SEE APPROPRIATE LEGEND
+
+# boxplot of zipCodeName column in dataframe
+figure(num=None, figsize=(20, 10), dpi=80, facecolor='w', edgecolor='k')
+plt.title("Boxplot Of Zip Code Names For Each Property", fontsize=22)
+plt.xlabel("zip code names", fontsize=14)
+sns.boxplot(x=data.ZipCodeName, color='#2CBDFE')
 plt.show()
 
-# boxplot of list_price column in dataframe
-figure(num=None, figsize=(8, 6), dpi=80, facecolor='w', edgecolor='k')
-plt.title("Boxplot of list_price column")
-sns.boxplot(x=data.ZipCodeName)
-plt.show()
+# Summary: Majority of properties are in zip codes between 10 and 22. NOTE PLEASE SEE variable legend TEXT FILE TO SEE APPROPRIATE LEGEND
+
 
 # Exploratory data analysis - univariate analysis (ALL VISUALIZATIONS ARE SAVE IN data_visualizations DIRECTORY.)
 # data visualization for baths column
 number_baths = data.baths.value_counts()  # Gives a pandas series
-number_baths.plot.bar()
+figure(num=None, figsize=(20, 10), dpi=80, facecolor='w', edgecolor='k')
+number_baths.plot.bar(color='#2CBDFE')
 plt.xticks(rotation=360)
-plt.title("Bar Chart Of Baths Column")
-plt.xlabel("Number Of Baths")
-plt.ylabel("Number Of Properties")
+plt.title("Bar Chart Comparing The Number Of Baths And The Number Of Properties", fontsize=22)
+plt.xlabel("Number Of Baths", fontsize=14)
+plt.ylabel("Number Of Properties", fontsize=14)
 plt.show()
+
+# Summary: Over 1,000 properties have 2 bathrooms
 
 # data visualization for beds column
 number_beds = data.beds.value_counts()  # Gives a pandas series
-number_beds.plot.bar()
+figure(num=None, figsize=(20, 10), dpi=80, facecolor='w', edgecolor='k')
+number_beds.plot.bar(color='#2CBDFE')
 plt.xticks(rotation=360)
-plt.title("Bar Chart Of Beds Column")
-plt.xlabel("Number Of Beds")
-plt.ylabel("Number Of Properties")
+plt.title("Bar Chart Comparing The Number Of Beds And The Number Of Properties", fontsize=22)
+plt.xlabel("Number Of Beds", fontsize=14)
+plt.ylabel("Number Of Properties", fontsize=14)
 plt.show()
+
+# Summary: Over 700 properties have 2 bedrooms, followed closely by 600 properties that have 3 bedrooms
 
 # data visualization for is_foreclosure column
 number_is_foreclosure = data.is_foreclosure.value_counts()  # Gives a pandas series
-number_is_foreclosure.plot.bar()
+figure(num=None, figsize=(20, 10), dpi=80, facecolor='w', edgecolor='k')
+number_is_foreclosure.plot.bar(color='#2CBDFE')
 plt.xticks(rotation=360)
-plt.title("Bar Chart Of Is_Foreclosure Column")
-plt.xlabel("Number Of Is_Foreclosure")
-plt.ylabel("Number Of Properties")
+plt.title("Bar Chart Comparing The Number Of Property Foreclosures And The Number Of Properties", fontsize=22)
+plt.xlabel("Number Of Is_Foreclosure", fontsize=14)
+plt.ylabel("Number Of Properties", fontsize=14)
 plt.show()
 
-figure(num=None, figsize=(6, 6), dpi=80, facecolor='w', edgecolor='k')
+# Summary: Over 2,000 properties are not foreclosure properties
+
+figure(num=None, figsize=(20, 10), dpi=80, facecolor='w', edgecolor='k')
 number_is_foreclosure_pie = data.is_foreclosure.value_counts(normalize=True)
 number_is_foreclosure_pie.plot.pie(radius=2200, frame=True, autopct='%.0f%%')
-plt.legend(["yes", "no"], loc='upper right')
-plt.title("Pie Chart Of Is_Foreclosure Column")
+plt.legend(["no", "yes"], loc='upper right')
+plt.title("Pie Chart Of Percentage of Foreclosures", fontsize=22)
 plt.show()
+
+# Summary: 96% of properties are not foreclosure properties
 
 # data visualization for CityName column
 city_labels = ['Miami', 'Miami Beach', 'Coconut Grove', 'Coral Gables', 'Doral', 'Hialeah']
 default_city_ticks = range(len(city_labels))
 number_city_names = data.CityName.value_counts()  # Gives a pandas series
-number_city_names.plot.bar()
-plt.title("Bar Chart Of City_Names Column")
+figure(num=None, figsize=(20, 10), dpi=80, facecolor='w', edgecolor='k')
+number_city_names.plot.bar(color='#2CBDFE')
+plt.title("Bar Chart Of The Number Of Properties In Each City", fontsize=22)
 plt.xticks(default_city_ticks, city_labels, rotation=45)
-plt.xlabel("Number Of City_Names")
-plt.ylabel("Number Of Properties")
+plt.xlabel("Number Of City_Names", fontsize=14)
+plt.ylabel("Number Of Properties", fontsize=14)
 plt.show()
+
+# Summary: Over 2000 properties are in Miami
 
 # data visualization for CountyName column
 county_labels = ['MIAMI-DADE COUNTY', 'MIAMI-DADE', 'Miami-Dade', 'OTHER', 'Miami-Dade County', 'DADE']
 default_county_ticks = range(len(county_labels))
 number_county_names = data.CountyName.value_counts()  # Gives a pandas series
-number_county_names.plot.bar()
+figure(num=None, figsize=(20, 10), dpi=80, facecolor='w', edgecolor='k')
+number_county_names.plot.bar(color='#2CBDFE')
 plt.xticks(default_county_ticks, county_labels, rotation=360)
-plt.title("Bar Chart Of County_Names Column")
-plt.xlabel("Number Of County_Names")
-plt.ylabel("Number Of Properties")
+plt.title("Bar Chart Of The Number Of Properties In Each County", fontsize=22)
+plt.xlabel("Number Of County_Names", fontsize=14)
+plt.ylabel("Number Of Properties", fontsize=14)
 plt.show()
 
-figure(num=None, figsize=(6, 6), dpi=80, facecolor='w', edgecolor='k')
+# Summary: over 1,600 properties are in the county of MIAMI-DADE COUNTY
+
+figure(num=None, figsize=(20, 10), dpi=80, facecolor='w', edgecolor='k')
 number_county_names_pie = data.CountyName.value_counts(normalize=True)
 number_county_names_pie.plot.pie(radius=2200, frame=True, autopct='%.0f%%')
 plt.legend(county_mapper, loc='upper right')
-plt.title("Pie Chart Of County_Names Column")
+plt.title("Pie Chart Of The Number Of Properties In Each County", fontsize=22)
 plt.show()
+
+# Summary: 78% of properties are in the county of MIAMI-DADE COUNTY
 
 # data visualization for NeighborhoodName column
 neighborhood_labels = ['Upper Eastside', 'Brickell', 'Overtown', 'Downtown Miami',
@@ -307,48 +342,69 @@ neighborhood_labels = ['Upper Eastside', 'Brickell', 'Overtown', 'Downtown Miami
                        'Little Havana', 'Alameda - West Flagler', 'North Bayfront', 'Virginia Key']
 default_neighborhood_ticks = range(len(neighborhood_labels))
 number_neighborhood_names = data.NeighborhoodName.value_counts()  # Gives a pandas series
-number_neighborhood_names.plot.bar()
-plt.xticks(default_neighborhood_ticks, neighborhood_labels, rotation=360)
-plt.title("Bar Chart Of Neighborhood_Names Column")
-plt.xlabel("Number Of Neighborhood_Names")
-plt.ylabel("Number Of Properties")
+figure(num=None, figsize=(20, 10), dpi=80, facecolor='w', edgecolor='k')
+number_neighborhood_names.plot.bar(color='#2CBDFE')
+plt.xticks(default_neighborhood_ticks, rotation=360)
+plt.title("Bar Chart Of The Number Of Properties In Each Neighborhood", fontsize=22)
+plt.xlabel("Number Of Neighborhood_Names", fontsize=14)
+plt.ylabel("Number Of Properties", fontsize=14)
 plt.show()
 
-figure(num=None, figsize=(6, 6), dpi=80, facecolor='w', edgecolor='k')
-number_county_names_pie = data.NeighborhoodName.value_counts(normalize=True)
-number_county_names_pie.plot.pie(radius=2200, frame=True, autopct='%.0f%%')
-plt.legend(neighborhood_mapper, loc='upper right')
-plt.title("Pie Chart Of Neighborhood_Names Column")
+# Summary: Over 600 properties are in neighborhoods Flagami (19) and Upper Eastside (1). NOTE PLEASE SEE variable legend TEXT FILE TO SEE APPROPRIATE LEGEND
+
+neighborhood_names = dict(sorted(number_neighborhood_names.items(), key=operator.itemgetter(1), reverse=True))
+figure(num=None, figsize=(20, 10), dpi=80, facecolor='w', edgecolor='k')
+number_neighborhood_names.plot.pie(radius=2200, frame=True, autopct='%.0f%%')
+plt.legend(neighborhood_names, loc="upper right")
+plt.title("Pie Chart Of The Number Of Properties In Each Neighborhood", fontsize=22)
 plt.show()
+
+# Summary: The neighborhoods Flagami (19) and Upper Eastside (1) make up 39% of all properties
 
 # Exploratory data analysis - bivariate analysis (ALL VISUALIZATIONS ARE SAVE IN data_visualizations DIRECTORY.)
 # data for beds and price column
-figure(num=None, figsize=(8, 8), dpi=80, facecolor='w', edgecolor='k')
-plt.scatter(data.beds, data.list_price)
-plt.title("Scatter plot of beds and price")
-plt.xlabel("beds")
-plt.ylabel("price")
+figure(num=None, figsize=(20, 10), dpi=80, facecolor='w', edgecolor='k')
+plt.scatter(data.beds, data.list_price, color='#2CBDFE')
+plt.title("Scatter plot of beds and price", fontsize=22)
+plt.xlabel("beds", fontsize=14)
+plt.ylabel("price in $", fontsize=14)
 plt.show()
 
 # calculate correlation for beds and price column
 correlation = np.corrcoef(data.beds, data.list_price)
 print("correlation of beds and price: ", correlation)
 
+# summary: The beds and list_price column have a correlation of 0.26256629, which means these columns are ...
+
 # data for baths and price column
-figure(num=None, figsize=(8, 8), dpi=80, facecolor='w', edgecolor='k')
-plt.scatter(data.baths, data.list_price)
-plt.title("Scatter plot of baths and price")
-plt.xlabel("baths")
-plt.ylabel("price")
+figure(num=None, figsize=(20, 10), dpi=80, facecolor='w', edgecolor='k')
+plt.scatter(data.baths, data.list_price, color='#2CBDFE')
+plt.title("Scatter plot of baths and price", fontsize=22)
+plt.xlabel("baths", fontsize=14)
+plt.ylabel("price in $", fontsize=14)
 plt.show()
 
 # calculate correlation for baths and price column
 correlation2 = np.corrcoef(data.baths, data.list_price)
 print("correlation of baths and price: ", correlation2)
 
+# Summary: The baths and beds column have a correlation of 0.42760621, which means these columns are ...
+figure(num=None, figsize=(20, 10), dpi=80, facecolor='w', edgecolor='k')
+plt.scatter(data.baths, data.beds, color='#2CBDFE')
+plt.title("Scatter plot of baths and price", fontsize=22)
+plt.xlabel("baths", fontsize=14)
+plt.ylabel("beds", fontsize=14)
+plt.show()
+
+# calculate correlation for baths and price column
+correlation3 = np.corrcoef(data.baths, data.beds)
+print("correlation of baths and beds: ", correlation3)
+
+# summary: The baths and beds column have a correlation of 0.78879735, which means these columns are ...
+
 # Exploratory data analysis - multivariate analysis (ALL VISUALIZATIONS ARE SAVE IN data_visualizations DIRECTORY.)
 # heatmap of all variables in dataframe
-figure(num=None, figsize=(10, 8), dpi=80, facecolor='w', edgecolor='k')
+figure(num=None, figsize=(20, 10), dpi=80, facecolor='w', edgecolor='k')
 sns.heatmap(data.corr(), annot=True, cmap='Reds')
 plt.show()
 
