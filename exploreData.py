@@ -96,6 +96,7 @@ print("number of rows in dataframe: ", len(data.index))
 # Converting city variables into numerical variables
 city_mapper = {'Miami': 1, 'Miami Beach': 2, 'Coconut Grove': 3, 'Coral Gables': 4, 'Doral': 5, 'Hialeah': 6}
 data["CityName"] = data["city"].replace(city_mapper)
+
 # print("unique cities: ", data.city.unique())
 print("unique cityNames: ", data.CityName.unique())
 
@@ -106,6 +107,7 @@ data.drop(['city'], axis=1, inplace=True)
 county_mapper = {'MIAMI-DADE COUNTY': 1, 'MIAMI-DADE': 2, 'Miami-Dade': 3, 'OTHER': 4, 'Miami-Dade County': 5,
                  'DADE': 6}
 data["CountyName"] = data["county"].replace(county_mapper)
+
 # print("unique counties: ", data.county.unique())
 print("unique countyNames: ", data.CountyName.unique())
 
@@ -121,8 +123,10 @@ neighborhood_mapper = {'Upper Eastside': 1, 'Brickell': 2, 'Overtown': 3, 'Downt
                        'Little Havana': 21, 'Alameda - West Flagler': 22, 'North Bayfront': 23, 'Virginia Key': 24}
 
 data["NeighborhoodName"] = data["neighborhood"].replace(neighborhood_mapper)
+
 # print("unique neighborhood: ", data.neighborhood.unique())
 print("unique neighborhood names: ", data.NeighborhoodName.unique())
+
 # drop neighborhood column
 data.drop(['neighborhood'], axis=1, inplace=True)
 # print(data.head())
@@ -391,7 +395,7 @@ print("correlation of baths and price: ", correlation2)
 # Summary: The baths and beds column have a correlation of 0.42760621, which means these columns are ...
 figure(num=None, figsize=(20, 10), dpi=80, facecolor='w', edgecolor='k')
 plt.scatter(data.baths, data.beds, color='#2CBDFE')
-plt.title("Scatter plot of baths and price", fontsize=22)
+plt.title("Scatter plot of baths and beds", fontsize=22)
 plt.xlabel("baths", fontsize=14)
 plt.ylabel("beds", fontsize=14)
 plt.show()
@@ -405,6 +409,7 @@ print("correlation of baths and beds: ", correlation3)
 # Exploratory data analysis - multivariate analysis (ALL VISUALIZATIONS ARE SAVE IN data_visualizations DIRECTORY.)
 # heatmap of all variables in dataframe
 figure(num=None, figsize=(20, 10), dpi=80, facecolor='w', edgecolor='k')
+plt.title("Heatmap Of Property Dataframe Variables", fontsize=22)
 sns.heatmap(data.corr(), annot=True, cmap='Reds')
 plt.show()
 
@@ -464,8 +469,8 @@ kepler_map.add_data(data=data, name='Miami Property Data')
 kepler_map.config = custom_config
 # kepler_map.save_to_html(file_name="html_files/keplerDataVisualizationBaseMap.html")
 
-print(data.head())
-print(data.info())
+# print(data.head())
+# print(data.info())
 """
 UPDATED DATAFRAME 
  #   Column                       Non-Null Count  Dtype  
