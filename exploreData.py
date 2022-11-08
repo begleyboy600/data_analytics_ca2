@@ -500,4 +500,7 @@ UPDATED DATAFRAME
  22  TypeGarage                   2119 non-null   int32  
 """
 
+# save data to new csv file
+data.to_csv('processed_data.csv')
+
 
