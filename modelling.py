@@ -1,9 +1,10 @@
 import pandas as pd
 import numpy as np
 import os
-from sklearn.neural_network import MLPClassifier
-from sklearn.metrics import confusion_matrix
+from sklearn.linear_model import LinearRegression
+from sklearn.neural_network import MLPRegressor
 from sklearn.model_selection import train_test_split
+import pickle as plk
 
 # Shows max rows and columns in pandas dataframe when being displayed
 pd.set_option('display.max_columns', None)
@@ -71,59 +72,89 @@ data.drop('Unnamed: 0', axis=1, inplace=True)
 print(data.columns)
 
 # set the Response and the predictor variables
-x = data[['baths', 'beds', 'is_foreclosure', 'latitude',
-       'longitude', 'CityName', 'CountyName', 'NeighborhoodName',
-       'ZipCodeName', 'StatusInactive', 'StatusActive', 'StatusPending',
-       'StatusPublicRecord', 'TypeCondo/Coop', 'TypeSingleFamilyResidential',
-       'TypeMulti Family', 'TypeOther', 'TypeTownhouse', 'TypeCondo/Co-op',
-       'TypeGarage']]
+feats = ['baths', 'beds', 'list_price', 'is_foreclosure', 'latitude',
+         'longitude', 'CityName', 'CountyName', 'NeighborhoodName',
+         'ZipCodeName', 'StatusInactive', 'StatusActive', 'StatusPending',
+         'StatusPublicRecord', 'TypeCondo/Coop', 'TypeSingleFamilyResidential',
+         'TypeMulti Family', 'TypeOther', 'TypeTownhouse', 'TypeCondo/Co-op',
+         'TypeGarage']
 
-y = data[['list_price']]
+x = data[feats]
 
-# nirst split training - test 60-40
+y = data.list_price
+
+# first split training - test 60-40
 x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.4)
 
 # now split test set into  validation - test  equally
 x_val, x_test, y_val, y_test = train_test_split(x_test, y_test, test_size=0.5)
 
-print(len(x_train))
-print(len(x_val))
-print(len(x_test))
+def linear_regression_model(x_train_, y_train_, x_val_, y_val_):
+    model = LinearRegression()
+    model.fit(x_train_, y_train_)
+    predictions = model.predict(x_val_)
+    # preds = [pr[0] for pr in predictions]
+    prediction_MAE = sum(abs(predictions - y_val_)) / len(y_val_)
+    prediction_MAPE = sum(abs((predictions - y_val_) / y_val_)) / len(y_val_)
+    prediction_RMSE = (sum((predictions - y_val_) ** 2) / len(y_val_)) ** 0.5
+    print(f"mae: {prediction_MAE:.15f}")
+    print(f"mape: {prediction_MAPE:.15f}")
+    print(f"rmse: {prediction_RMSE:.15f}")
 
-# https://keras.io/examples/structured_data/structured_data_classification_from_scratch/
+    df_preds = pd.DataFrame({'Actual': y_val_.squeeze(), 'Predicted': predictions.squeeze()})
+    print(df_preds.head())
 
 
-def model_selection_for_nueral_net(layers, iterations, x_train_, y_train_, x_val_, y_val_):
-    model = MLPClassifier(hidden_layer_sizes=layers, max_iter=iterations)
+def linear_regression_model_test(x_train_, y_train_, x_test_, y_test_):
+    model = LinearRegression()
+    model.fit(x_train_, y_train_)
+    predictions = model.predict(x_test_)
+    # preds = [pr[0] for pr in predictions]
+    prediction_MAE = sum(abs(predictions - y_test_)) / len(y_test_)
+    prediction_MAPE = sum(abs((predictions - y_test_) / y_test_)) / len(y_test_)
+    prediction_RMSE = (sum((predictions - y_test_) ** 2) / len(y_test_)) ** 0.5
+    print(f"mae: {prediction_MAE:.15f}")
+    print(f"mape: {prediction_MAPE:.15f}")
+    print(f"rmse: {prediction_RMSE:.15f}")
+
+    df_preds = pd.DataFrame({'Actual': y_test_.squeeze(), 'Predicted': predictions.squeeze()})
+    print(df_preds.head())
+
+
+def model_selection_for_neural_net(layers, iterations, x_train_, y_train_, x_val_, y_val_):
+    model = MLPRegressor(hidden_layer_sizes=layers, max_iter=iterations)
 
     # Select the model using the training data
     model.fit(x_train_, y_train_)
-
+    print("done")
     #########Modelling - Step 3: Model Evaluation Based on TEST set.
 
     # Find the predicted values from the test set
     predictions = model.predict(x_val_)
+    # prediction_MAE = sum(abs(predictions - y_val_)) / len(y_val_)
+    prediction_MAPE = sum(abs((predictions - y_val_) / y_val_)) / len(y_val_)
+    # prediction_RMSE = (sum((predictions - y_val_) ** 2) / len(y_val_)) ** 0.5
 
-    # Calculate performance metrics Accuracy, Error Rate, Precision and Recall from the confusion matrix
-
-    confusionMatrix = confusion_matrix(y_val_, predictions)
-    # print(confusionMatrix)
-
-    # Check numbers
-    numberSurvivedTest = y_val_.value_counts()
-
-    accuracy = (confusionMatrix[0, 0] + confusionMatrix[1, 1]) / len(predictions)
-    # errorRate = 1 - accuracy
-    # precision = (confusionMatrix[1, 1]) / (confusionMatrix[1, 1] + confusionMatrix[0, 1])
-    # recall = (confusionMatrix[1, 1]) / (confusionMatrix[1, 1] + confusionMatrix[1, 0])
-    # print("Accuracy: " + str(accuracy))
-    # print("Error Rate: " + str(errorRate))
-    # print("Precision: " + str(precision))
-    # print("Recall: " + str(recall))
-    # Key value is the Accuracy which for the run was 0.8619
-    return accuracy
+    return prediction_MAPE
 
 
+def final_neural_network(layers, iterations, x_train_, y_train_):
+    model = MLPRegressor(hidden_layer_sizes=layers, max_iter=iterations)
+
+    # Select the model using the training data
+    model.fit(x_train_, y_train_)
+    print("done")
+    return model
+
+
+def save_ai_model(model):
+    return 0
+
+
+linear_regression_model(x_train_=x_train, y_train_=y_train)
+
+
+"""
 nueral_network_accuracy = []
 hidden_layers_breakdown = 0
 for layer in range(2, 13, 1):
@@ -131,16 +162,39 @@ for layer in range(2, 13, 1):
         print(hidden_layers_breakdown)
         set_layers = tuple([node for i in range(layer)])
         print(set_layers)
-        acc = model_selection_for_nueral_net(layers=set_layers, iterations=500, x_train_=x_train, y_train_=y_train, x_val_=x_val, y_val_=y_val)
+        acc = model_selection_for_neural_net(layers=set_layers, iterations=500, x_train_=x_train, y_train_=y_train,
+                                             x_val_=x_val, y_val_=y_val)
         print(acc)
         nueral_network_accuracy.append(acc)
         hidden_layers_breakdown = hidden_layers_breakdown + 1
 
+min_accuracy = min(nueral_network_accuracy)
+min_accuracy_index = nueral_network_accuracy.index(min_accuracy)
+print("model by min accuracy: ", min_accuracy, " index: ", min_accuracy_index)
 
-best_accuracy = max(nueral_network_accuracy)
-accuracy_index = nueral_network_accuracy.index(best_accuracy)
-print("best model by accuracy: ", best_accuracy, " index: ", accuracy_index)
+max_accuracy = max(nueral_network_accuracy)
+max_accuracy_index = nueral_network_accuracy.index(max_accuracy)
+print("model by max accuracy: ", max_accuracy, " index: ", max_accuracy_index)
+"""
 
+# model by min accuracy:  1.1010587094603724e-05  index:  19
+# model by max accuracy:  1.2850688659865277  index:  24
 
+# mean absolute percentage error: 1.1010587094603724e-05 = 0.0000110106
+# model accuracy: 0.9999889894
+# model layers: (10, 10, 10, 10, 10, 10, 10, 10)
+
+ai_model = final_neural_network(layers=(10, 10, 10, 10, 10, 10, 10, 10), iterations=500, x_train_=x_train, y_train_=y_train)
+
+predictions = ai_model.predict(x_test)
+prediction_MAE = sum(abs(predictions - y_test)) / len(y_test)
+prediction_MAPE = sum(abs((predictions - y_test) / y_test)) / len(y_test)
+prediction_RMSE = (sum((predictions - y_test) ** 2) / len(y_test)) ** 0.5
+print(f"MAE: {prediction_MAE:.15f}")
+print(f"MAPE: {prediction_MAPE:.15f}")
+print(f"RMSE: {prediction_RMSE:.15f}")
+
+model_accuracy = 1 - prediction_MAPE
+print(f"Model Accuracy: {model_accuracy:.15f}")
 
 
