@@ -4,7 +4,7 @@ import os
 from sklearn.linear_model import LinearRegression
 from sklearn.neural_network import MLPRegressor
 from sklearn.model_selection import train_test_split
-import pickle as plk
+import pickle
 
 # Shows max rows and columns in pandas dataframe when being displayed
 pd.set_option('display.max_columns', None)
@@ -89,6 +89,7 @@ x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.4)
 # now split test set into  validation - test  equally
 x_val, x_test, y_val, y_test = train_test_split(x_test, y_test, test_size=0.5)
 
+
 def linear_regression_model(x_train_, y_train_, x_val_, y_val_):
     model = LinearRegression()
     model.fit(x_train_, y_train_)
@@ -147,11 +148,18 @@ def final_neural_network(layers, iterations, x_train_, y_train_):
     return model
 
 
-def save_ai_model(model):
-    return 0
+def save_ai_model(model, file_name):
+    with open(file_name, 'wb') as file:
+        pickle.dump(model, file)
+    print(f"{file_name} was created successfully")
 
 
-linear_regression_model(x_train_=x_train, y_train_=y_train)
+def load_ai_model(file_name):
+    with open(file_name, 'rb') as file:
+        model = pickle.load(file)
+    return model
+
+# linear_regression_model(x_train_=x_train, y_train_=y_train, x_val_=x_val, y_val_=y_val)
 
 
 """
@@ -184,9 +192,17 @@ print("model by max accuracy: ", max_accuracy, " index: ", max_accuracy_index)
 # model accuracy: 0.9999889894
 # model layers: (10, 10, 10, 10, 10, 10, 10, 10)
 
-ai_model = final_neural_network(layers=(10, 10, 10, 10, 10, 10, 10, 10), iterations=500, x_train_=x_train, y_train_=y_train)
+# ai_model = final_neural_network(layers=(10, 10, 10, 10, 10, 10, 10, 10), iterations=500, x_train_=x_train, y_train_=y_train)
 
-predictions = ai_model.predict(x_test)
+file_name = "neural_network_model.pkl"
+
+# Save neural network
+# save_ai_model(ai_model, file_name=file_name)
+
+# Load neural network
+loaded_model = load_ai_model(file_name)
+
+predictions = loaded_model.predict(x_test)
 prediction_MAE = sum(abs(predictions - y_test)) / len(y_test)
 prediction_MAPE = sum(abs((predictions - y_test) / y_test)) / len(y_test)
 prediction_RMSE = (sum((predictions - y_test) ** 2) / len(y_test)) ** 0.5
