@@ -1,10 +1,20 @@
+from datetime import datetime
+import keras
 import pandas as pd
 import numpy as np
 import os
+
+from keras import layers
+from matplotlib import pyplot as plt
+from matplotlib.pyplot import figure
 from sklearn.linear_model import LinearRegression
 from sklearn.neural_network import MLPRegressor
 from sklearn.model_selection import train_test_split
 import pickle
+import tensorboard
+import tensorflow as tf
+import datetime
+
 
 # Shows max rows and columns in pandas dataframe when being displayed
 pd.set_option('display.max_columns', None)
@@ -104,11 +114,10 @@ def linear_regression_model(x_train_, y_train_, x_val_, y_val_):
 
     df_preds = pd.DataFrame({'Actual': y_val_.squeeze(), 'Predicted': predictions.squeeze()})
     print(df_preds.head())
+    return model
 
 
-def linear_regression_model_test(x_train_, y_train_, x_test_, y_test_):
-    model = LinearRegression()
-    model.fit(x_train_, y_train_)
+def linear_regression_model_test(model, x_test_, y_test_):
     predictions = model.predict(x_test_)
     # preds = [pr[0] for pr in predictions]
     prediction_MAE = sum(abs(predictions - y_test_)) / len(y_test_)
@@ -122,13 +131,43 @@ def linear_regression_model_test(x_train_, y_train_, x_test_, y_test_):
     print(df_preds.head())
 
 
+def find_best_ai_architecture(x_train_, y_train_):
+    nueral_network_accuracy = []
+    hidden_layers_breakdown = 0
+    for layer in range(2, 13, 1):
+        for node in range(5, 20, 5):
+            print(hidden_layers_breakdown)
+            set_layers = tuple([node for i in range(layer)])
+            print(set_layers)
+            acc = model_selection_for_neural_net(layers=set_layers, iterations=500, x_train_=x_train_,
+                                                 y_train_=y_train_,
+                                                 x_val_=x_val, y_val_=y_val)
+            print(acc)
+            nueral_network_accuracy.append(acc)
+            hidden_layers_breakdown = hidden_layers_breakdown + 1
+
+    min_accuracy = min(nueral_network_accuracy)
+    min_accuracy_index = nueral_network_accuracy.index(min_accuracy)
+    print("model by min accuracy: ", min_accuracy, " index: ", min_accuracy_index)
+
+    max_accuracy = max(nueral_network_accuracy)
+    max_accuracy_index = nueral_network_accuracy.index(max_accuracy)
+    print("model by max accuracy: ", max_accuracy, " index: ", max_accuracy_index)
+
+    # model by min accuracy:  1.1010587094603724e-05  index:  19
+    # model by max accuracy:  1.2850688659865277  index:  24
+
+    # mean absolute percentage error: 1.1010587094603724e-05 = 0.0000110106
+    # model accuracy: 0.9999889894
+    # model layers: (10, 10, 10, 10, 10, 10, 10, 10)
+
+
 def model_selection_for_neural_net(layers, iterations, x_train_, y_train_, x_val_, y_val_):
     model = MLPRegressor(hidden_layer_sizes=layers, max_iter=iterations)
 
     # Select the model using the training data
     model.fit(x_train_, y_train_)
-    print("done")
-    #########Modelling - Step 3: Model Evaluation Based on TEST set.
+    print("model trained")
 
     # Find the predicted values from the test set
     predictions = model.predict(x_val_)
@@ -142,11 +181,36 @@ def model_selection_for_neural_net(layers, iterations, x_train_, y_train_, x_val
 def final_neural_network(layers, iterations, x_train_, y_train_):
     model = MLPRegressor(hidden_layer_sizes=layers, max_iter=iterations)
 
+    log_dir = "logs/fit/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+    tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
+
     # Select the model using the training data
     model.fit(x_train_, y_train_)
-    print("done")
+    print("model trained")
     return model
 
+
+def neural_network_model_with_tf(x_train_, y_train_, x_test_, y_test_):
+    model = keras.Sequential(
+        [
+            layers.Dense(10, activation="relu", name="layer1"),
+            layers.Dense(10, activation="relu", name="layer2"),
+            layers.Dense(10, activation="relu", name="layer3"),
+            layers.Dense(10, activation="relu", name="layer4"),
+            layers.Dense(10, activation="relu", name="layer5"),
+            layers.Dense(10, activation="relu", name="layer6"),
+            layers.Dense(10, activation="relu", name="layer7"),
+            layers.Dense(10, activation="relu", name="layer8"),
+            layers.Dense(1, name="layer9"),
+        ]
+    )
+    log_dir = "logs/fit/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+    tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
+
+    model.compile(loss='mean_absolute_percentage_error', optimizer=tf.keras.optimizers.Adam(0.001))
+
+    model.fit(x=x_train_, y=y_train_, epochs=200, validation_data=(x_test_, y_test_), callbacks=[tensorboard_callback])
+    return model
 
 def save_ai_model(model, file_name):
     with open(file_name, 'wb') as file:
@@ -154,63 +218,72 @@ def save_ai_model(model, file_name):
     print(f"{file_name} was created successfully")
 
 
+def save_tf_model(model, file_name):
+    model.save(file_name)
+    print(f"{file_name} was created successfully")
+
+
+def load_tf_model(file_name):
+    model = keras.models.load_model(file_name)
+    return model
+
+
 def load_ai_model(file_name):
     with open(file_name, 'rb') as file:
         model = pickle.load(file)
     return model
 
-# linear_regression_model(x_train_=x_train, y_train_=y_train, x_val_=x_val, y_val_=y_val)
+
+def ai_model_evaluation(loaded_model, x_test_, y_test_):
+    predictions = loaded_model.predict(x_test_)
+    prediction_MAE = sum(abs(predictions - y_test_)) / len(y_test_)
+    prediction_MAPE = sum(abs((predictions - y_test_) / y_test_)) / len(y_test_)
+    prediction_RMSE = (sum((predictions - y_test_) ** 2) / len(y_test_)) ** 0.5
+    print(f"MAE: {prediction_MAE:.15f}")
+    print(f"MAPE: {prediction_MAPE:.15f}")
+    print(f"RMSE: {prediction_RMSE:.15f}")
+
+    model_accuracy = 1 - prediction_MAPE
+    print(f"Model Accuracy: {model_accuracy:.15f}")
+    return predictions
 
 
-"""
-nueral_network_accuracy = []
-hidden_layers_breakdown = 0
-for layer in range(2, 13, 1):
-    for node in range(5, 20, 5):
-        print(hidden_layers_breakdown)
-        set_layers = tuple([node for i in range(layer)])
-        print(set_layers)
-        acc = model_selection_for_neural_net(layers=set_layers, iterations=500, x_train_=x_train, y_train_=y_train,
-                                             x_val_=x_val, y_val_=y_val)
-        print(acc)
-        nueral_network_accuracy.append(acc)
-        hidden_layers_breakdown = hidden_layers_breakdown + 1
+# create linear regression model
+# lr_model = linear_regression_model(x_train_=x_train, y_train_=y_train, x_val_=x_val, y_val_=y_val)
 
-min_accuracy = min(nueral_network_accuracy)
-min_accuracy_index = nueral_network_accuracy.index(min_accuracy)
-print("model by min accuracy: ", min_accuracy, " index: ", min_accuracy_index)
+# test linear regression model on test data and evaluate model
+# linear_regression_model_test(model=lr_model, x_test_=x_test, y_test_=y_test)
 
-max_accuracy = max(nueral_network_accuracy)
-max_accuracy_index = nueral_network_accuracy.index(max_accuracy)
-print("model by max accuracy: ", max_accuracy, " index: ", max_accuracy_index)
-"""
+# find the best neural network architecture
+# find_best_ai_architecture(x_train, y_train)
 
-# model by min accuracy:  1.1010587094603724e-05  index:  19
-# model by max accuracy:  1.2850688659865277  index:  24
-
-# mean absolute percentage error: 1.1010587094603724e-05 = 0.0000110106
-# model accuracy: 0.9999889894
-# model layers: (10, 10, 10, 10, 10, 10, 10, 10)
-
+# create neural network with the best model architecture
 # ai_model = final_neural_network(layers=(10, 10, 10, 10, 10, 10, 10, 10), iterations=500, x_train_=x_train, y_train_=y_train)
+# model = neural_network_model_with_tf(x_train_=x_train, y_train_=y_train, x_test_=x_test, y_test_=y_test)
 
+# pickle file name
 file_name = "neural_network_model.pkl"
+file_name2 = "neural_network_model_with_tensorboard.h5"
 
 # Save neural network
-# save_ai_model(ai_model, file_name=file_name)
+# save_ai_model(model, file_name=file_name)
+# save_tf_model(model, file_name2)
 
 # Load neural network
 loaded_model = load_ai_model(file_name)
+loaded_tf_model = load_tf_model(file_name2)
 
-predictions = loaded_model.predict(x_test)
-prediction_MAE = sum(abs(predictions - y_test)) / len(y_test)
-prediction_MAPE = sum(abs((predictions - y_test) / y_test)) / len(y_test)
-prediction_RMSE = (sum((predictions - y_test) ** 2) / len(y_test)) ** 0.5
-print(f"MAE: {prediction_MAE:.15f}")
-print(f"MAPE: {prediction_MAPE:.15f}")
-print(f"RMSE: {prediction_RMSE:.15f}")
+# get ai model evaluation
+predictions = ai_model_evaluation(loaded_model=loaded_model, x_test_=x_test, y_test_=y_test)
 
-model_accuracy = 1 - prediction_MAPE
-print(f"Model Accuracy: {model_accuracy:.15f}")
+
+figure(num=None, figsize=(8, 8), dpi=80, facecolor='w', edgecolor='k')
+plt.scatter(y_test, predictions)
+plt.show() #Should be close to a straight line
+
+figure(num=None, figsize=(8, 8), dpi=80, facecolor='w', edgecolor='k')
+plt.scatter(y_test, predictions - y_test)
+plt.show()
+
 
 
