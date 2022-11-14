@@ -3,7 +3,6 @@ import keras
 import pandas as pd
 import numpy as np
 import os
-
 from keras import layers
 from matplotlib import pyplot as plt
 from matplotlib.pyplot import figure
@@ -104,7 +103,6 @@ def linear_regression_model(x_train_, y_train_, x_val_, y_val_):
     model = LinearRegression()
     model.fit(x_train_, y_train_)
     predictions = model.predict(x_val_)
-    # preds = [pr[0] for pr in predictions]
     prediction_MAE = sum(abs(predictions - y_val_)) / len(y_val_)
     prediction_MAPE = sum(abs((predictions - y_val_) / y_val_)) / len(y_val_)
     prediction_RMSE = (sum((predictions - y_val_) ** 2) / len(y_val_)) ** 0.5
@@ -127,8 +125,8 @@ def linear_regression_model_test(model, x_test_, y_test_):
     print(f"mape: {prediction_MAPE:.15f}")
     print(f"rmse: {prediction_RMSE:.15f}")
 
-    df_preds = pd.DataFrame({'Actual': y_test_.squeeze(), 'Predicted': predictions.squeeze()})
-    print(df_preds.head())
+    # df_preds = pd.DataFrame({'Actual': y_test_.squeeze(), 'Predicted': predictions.squeeze()})
+    # print(df_preds.head())
 
 
 def find_best_ai_architecture(x_train_, y_train_):
@@ -212,6 +210,7 @@ def neural_network_model_with_tf(x_train_, y_train_, x_test_, y_test_):
     model.fit(x=x_train_, y=y_train_, epochs=200, validation_data=(x_test_, y_test_), callbacks=[tensorboard_callback])
     return model
 
+
 def save_ai_model(model, file_name):
     with open(file_name, 'wb') as file:
         pickle.dump(model, file)
@@ -247,43 +246,71 @@ def ai_model_evaluation(loaded_model, x_test_, y_test_):
     print(f"Model Accuracy: {model_accuracy:.15f}")
     return predictions
 
-
-# create linear regression model
-# lr_model = linear_regression_model(x_train_=x_train, y_train_=y_train, x_val_=x_val, y_val_=y_val)
-
-# test linear regression model on test data and evaluate model
-# linear_regression_model_test(model=lr_model, x_test_=x_test, y_test_=y_test)
-
 # find the best neural network architecture
 # find_best_ai_architecture(x_train, y_train)
+# best neural
 
-# create neural network with the best model architecture
+# call linear regression, neural network and tensorflow neural network models
 # ai_model = final_neural_network(layers=(10, 10, 10, 10, 10, 10, 10, 10), iterations=500, x_train_=x_train, y_train_=y_train)
 # model = neural_network_model_with_tf(x_train_=x_train, y_train_=y_train, x_test_=x_test, y_test_=y_test)
+# lr_model = linear_regression_model(x_train_=x_train, y_train_=y_train, x_val_=x_val, y_val_=y_val)
 
 # pickle file name
 file_name = "neural_network_model.pkl"
 file_name2 = "neural_network_model_with_tensorboard.h5"
+file_name3 = "basic_linear_regression_model.pkl"
 
 # Save neural network
 # save_ai_model(model, file_name=file_name)
 # save_tf_model(model, file_name2)
+# save_ai_model(lr_model, file_name3)
 
 # Load neural network
-loaded_model = load_ai_model(file_name)
+loaded_lr_model = load_ai_model(file_name3)
+loaded_sk_model = load_ai_model(file_name)
 loaded_tf_model = load_tf_model(file_name2)
 
+# install tensorboard: pip install tensorboard
+# to run the tensorboard navigate to the project folder and then insert the following command:
+# tensorboard --logdir=logs/fit
+
 # get ai model evaluation
-predictions = ai_model_evaluation(loaded_model=loaded_model, x_test_=x_test, y_test_=y_test)
+print("linear regression model evaluation: ")
+predictions_lr = ai_model_evaluation(loaded_model=loaded_lr_model, x_test_=x_test, y_test_=y_test)
 
+print("sklearn neural network model evaluation: ")
+predictions_sk = ai_model_evaluation(loaded_model=loaded_sk_model, x_test_=x_test, y_test_=y_test)
+
+# print("tensorflow neural network model evaluation: ")
+# predictions_tf = ai_model_evaluation(loaded_model=loaded_tf_model, x_test_=x_test, y_test_=y_test)
+
+# visualizations for linear regression model evaluations
+figure(num=None, figsize=(8, 8), dpi=80, facecolor='w', edgecolor='k')
+plt.scatter(y_test, predictions_lr)
+plt.title("Predictions v Actual Test Values For Linear Regression Model", fontsize=22)
+plt.xlabel("Actual values", fontsize=14)
+plt.ylabel("Predicted Values", fontsize=14)
+plt.show() # Should be close to a straight line
 
 figure(num=None, figsize=(8, 8), dpi=80, facecolor='w', edgecolor='k')
-plt.scatter(y_test, predictions)
-plt.show() #Should be close to a straight line
-
-figure(num=None, figsize=(8, 8), dpi=80, facecolor='w', edgecolor='k')
-plt.scatter(y_test, predictions - y_test)
+plt.scatter(y_test, predictions_lr - y_test)
+plt.title("Predictions v Actual Test Values For Linear Regression Model", fontsize=22)
+plt.xlabel("Actual values", fontsize=14)
+plt.ylabel("Predicted Values", fontsize=14)
 plt.show()
 
+# visualizations for sklearn model evaluations
+figure(num=None, figsize=(8, 8), dpi=80, facecolor='w', edgecolor='k')
+plt.scatter(y_test, predictions_sk)
+plt.title("Predictions v Actual Test Values For Sklearn Model", fontsize=22)
+plt.xlabel("Actual values", fontsize=14)
+plt.ylabel("Predicted Values", fontsize=14)
+plt.show() # Should be close to a straight line
 
+figure(num=None, figsize=(8, 8), dpi=80, facecolor='w', edgecolor='k')
+plt.scatter(y_test, predictions_sk - y_test)
+plt.title("Predictions v Actual Test Values For Sklearn Model", fontsize=22)
+plt.xlabel("Actual values", fontsize=14)
+plt.ylabel("Predicted Values", fontsize=14)
+plt.show()
 
