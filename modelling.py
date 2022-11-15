@@ -13,7 +13,10 @@ import pickle
 import tensorboard
 import tensorflow as tf
 import datetime
+import warnings
 
+# remove all FutureWarnings from the run window
+warnings.simplefilter(action='ignore', category=FutureWarning)
 
 # Shows max rows and columns in pandas dataframe when being displayed
 pd.set_option('display.max_columns', None)
@@ -27,34 +30,6 @@ os.chdir("C://Users//conor//PycharmProjects//data_science_ca2//")
 data = pd.read_csv("processed_data.csv")
 
 # print(data.head())
-
-# print(data.info())
-"""
-0   Unnamed: 0                   2119 non-null   int64  
- 1   address                      2119 non-null   object 
- 2   state                        2119 non-null   object 
- 3   baths                        2119 non-null   float64
- 4   beds                         2119 non-null   float64
- 5   list_price                   2119 non-null   float64
- 6   is_foreclosure               2119 non-null   int64  
- 7   latitude                     2119 non-null   float64
- 8   longitude                    2119 non-null   float64
- 9   CityName                     2119 non-null   int64  
- 10  CountyName                   2119 non-null   int64  
- 11  NeighborhoodName             2119 non-null   int64  
- 12  ZipCodeName                  2119 non-null   int64  
- 13  StatusInactive               2119 non-null   int64  
- 14  StatusActive                 2119 non-null   int64  
- 15  StatusPending                2119 non-null   int64  
- 16  StatusPublicRecord           2119 non-null   int64  
- 17  TypeCondo/Coop               2119 non-null   int64  
- 18  TypeSingleFamilyResidential  2119 non-null   int64  
- 19  TypeMulti Family             2119 non-null   int64  
- 20  TypeOther                    2119 non-null   int64  
- 21  TypeTownhouse                2119 non-null   int64  
- 22  TypeCondo/Co-op              2119 non-null   int64  
- 23  TypeGarage                   2119 non-null   int64  
-"""
 
 # Feature Engineering
 # check data clean - All Ok
@@ -80,6 +55,32 @@ data.drop('Unnamed: 0', axis=1, inplace=True)
 # print out all columns in dataframe
 print(data.columns)
 
+# print(data.info())
+"""
+Output for print(data.info()):
+ 0   baths                        2119 non-null   float64   numerical - discrete - independent
+ 1   beds                         2119 non-null   float64   numerical - discrete - independent
+ 2   list_price                   2119 non-null   float64   numerical - continuous - dependent
+ 3   is_foreclosure               2119 non-null   int64     numerical - discrete - independent
+ 4   latitude                     2119 non-null   float64   numerical - continuous - independent
+ 5   longitude                    2119 non-null   float64   numerical - continuous - independent
+ 6   CityName                     2119 non-null   int64     numerical - discrete - independent
+ 7   CountyName                   2119 non-null   int64     numerical - discrete - independent
+ 8   NeighborhoodName             2119 non-null   int64     numerical - discrete - independent
+ 9   ZipCodeName                  2119 non-null   int64     numerical - discrete - independent
+ 10  StatusInactive               2119 non-null   int64     numerical - discrete - independent
+ 11  StatusActive                 2119 non-null   int64     numerical - discrete - independent
+ 12  StatusPending                2119 non-null   int64     numerical - discrete - independent
+ 13  StatusPublicRecord           2119 non-null   int64     numerical - discrete - independent
+ 14  TypeCondo/Coop               2119 non-null   int64     numerical - discrete - independent
+ 15  TypeSingleFamilyResidential  2119 non-null   int64     numerical - discrete - independent
+ 16  TypeMulti Family             2119 non-null   int64     numerical - discrete - independent
+ 17  TypeOther                    2119 non-null   int64     numerical - discrete - independent
+ 18  TypeTownhouse                2119 non-null   int64     numerical - discrete - independent
+ 19  TypeCondo/Co-op              2119 non-null   int64     numerical - discrete - independent
+ 20  TypeGarage                   2119 non-null   int64     numerical - discrete - independent
+"""
+
 # set the Response and the predictor variables
 feats = ['baths', 'beds', 'list_price', 'is_foreclosure', 'latitude',
          'longitude', 'CityName', 'CountyName', 'NeighborhoodName',
@@ -103,15 +104,43 @@ def linear_regression_model(x_train_, y_train_, x_val_, y_val_):
     model = LinearRegression()
     model.fit(x_train_, y_train_)
     predictions = model.predict(x_val_)
+
+    # model coefficient
+    print("model coefficient: ", model.coef_)
+    """
+    output: 
+    [-2.73085354e-10 -3.65078258e-10  1.00000000e+00 -7.17153289e-10 -7.79343035e-10 -9.94009871e-10 
+    -6.18427141e-11 -4.63046404e-13 -6.62411345e-12  8.55606848e-13 -1.35986795e-11 -3.46720738e-12
+    4.65525739e-12  1.24106295e-11 -4.12759188e-10 -5.20771219e-10 -4.36132025e-10 -2.95022415e-10 
+    -4.51249254e-10 -4.16348287e-10 2.53228239e-09]
+    """
+    # model y-intercept
+    print("model y-intercept: ", model.intercept_)      # output: -5.7392753660678864e-08
+
+    # predictions for the train data
+    predictions_train = model.predict(x_train)
+
+    raw_sum_sq_errors = sum((y_train.mean() - y_train) ** 2)
+    print("raw sum sq errors: ", raw_sum_sq_errors)    # output: 3444564380178847.5
+    prediction_sum_sq_errors = sum((predictions_train - y_train) ** 2)
+
+    Rsquared_1 = 1 - prediction_sum_sq_errors / raw_sum_sq_errors
+    print("r squared: ", Rsquared_1)   # r squared value: 1.0
+
     prediction_MAE = sum(abs(predictions - y_val_)) / len(y_val_)
     prediction_MAPE = sum(abs((predictions - y_val_) / y_val_)) / len(y_val_)
     prediction_RMSE = (sum((predictions - y_val_) ** 2) / len(y_val_)) ** 0.5
-    print(f"mae: {prediction_MAE:.15f}")
-    print(f"mape: {prediction_MAPE:.15f}")
-    print(f"rmse: {prediction_RMSE:.15f}")
+    # mae to 15 decimal places
+    print(f"mae: {prediction_MAE:.15f}")    # 0.000000000593746
+    # mape to 15 decimal places
+    print(f"mape: {prediction_MAPE:.15f}")  # 0.000000000000001
+    # rmse to 15 decimal places
+    print(f"rmse: {prediction_RMSE:.15f}")   # 0.000000001364676
 
-    df_preds = pd.DataFrame({'Actual': y_val_.squeeze(), 'Predicted': predictions.squeeze()})
-    print(df_preds.head())
+    # put predictions and actual values in a dataframe
+    # df_preds = pd.DataFrame({'Actual': y_val_.squeeze(), 'Predicted': predictions.squeeze()})
+    # print first 5 rows
+    # print(df_preds.head())
     return model
 
 
@@ -169,22 +198,46 @@ def model_selection_for_neural_net(layers, iterations, x_train_, y_train_, x_val
 
     # Find the predicted values from the test set
     predictions = model.predict(x_val_)
-    # prediction_MAE = sum(abs(predictions - y_val_)) / len(y_val_)
     prediction_MAPE = sum(abs((predictions - y_val_) / y_val_)) / len(y_val_)
-    # prediction_RMSE = (sum((predictions - y_val_) ** 2) / len(y_val_)) ** 0.5
 
     return prediction_MAPE
 
 
-def final_neural_network(layers, iterations, x_train_, y_train_):
+def final_neural_network(layers, iterations, x_train_, y_train_, x_val_, y_val_):
     model = MLPRegressor(hidden_layer_sizes=layers, max_iter=iterations)
 
-    log_dir = "logs/fit/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-    tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
+    # log_dir = "logs/fit/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+    # tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
 
     # Select the model using the training data
     model.fit(x_train_, y_train_)
+    predictions = model.predict(x_val_)
     print("model trained")
+
+    # predictions for the train data
+    predictions_train = model.predict(x_train)
+
+    raw_sum_sq_errors = sum((y_train.mean() - y_train) ** 2)
+    print("raw sum sq errors: ", raw_sum_sq_errors)     # output: 3444564380178847.5
+    prediction_sum_sq_errors = sum((predictions_train - y_train) ** 2)
+
+    Rsquared_1 = 1 - prediction_sum_sq_errors / raw_sum_sq_errors
+    print("r squared: ", Rsquared_1)  # output: 0.9999999986087129
+
+    prediction_MAE = sum(abs(predictions - y_val_)) / len(y_val_)
+    prediction_MAPE = sum(abs((predictions - y_val_) / y_val_)) / len(y_val_)
+    prediction_RMSE = (sum((predictions - y_val_) ** 2) / len(y_val_)) ** 0.5
+    # mae to 15 decimal places
+    print(f"mae: {prediction_MAE:.15f}")    # output: 58.666525739282186
+    # mape to 15 decimal places
+    print(f"mape: {prediction_MAPE:.15f}")  # output: 0.000165970469553
+    # rmse to 15 decimal places
+    print(f"rmse: {prediction_RMSE:.15f}")  # output: 60.696292393539295
+
+    # put predictions and actual values in a dataframe
+    # df_preds = pd.DataFrame({'Actual': y_val_.squeeze(), 'Predicted': predictions.squeeze()})
+    # print first 5 rows
+    # print(df_preds.head())
     return model
 
 
@@ -246,14 +299,22 @@ def ai_model_evaluation(loaded_model, x_test_, y_test_):
     print(f"Model Accuracy: {model_accuracy:.15f}")
     return predictions
 
+
+def tf_model_evaluation(loaded_model, x_test_):
+    predictions = loaded_model.predict(x_test_)
+    print("Model evaluated")
+    return predictions
+
+
 # find the best neural network architecture
 # find_best_ai_architecture(x_train, y_train)
-# best neural
+# best neural network architecture (10, 10, 10, 10, 10, 10, 10, 10)
 
 # call linear regression, neural network and tensorflow neural network models
-# ai_model = final_neural_network(layers=(10, 10, 10, 10, 10, 10, 10, 10), iterations=500, x_train_=x_train, y_train_=y_train)
+#ai_model = final_neural_network(layers=(10, 10, 10, 10, 10, 10, 10, 10), iterations=500, x_train_=x_train, y_train_=y_train, x_val_=x_val, y_val_=y_val)
 # model = neural_network_model_with_tf(x_train_=x_train, y_train_=y_train, x_test_=x_test, y_test_=y_test)
 # lr_model = linear_regression_model(x_train_=x_train, y_train_=y_train, x_val_=x_val, y_val_=y_val)
+
 
 # pickle file name
 file_name = "neural_network_model.pkl"
@@ -261,9 +322,10 @@ file_name2 = "neural_network_model_with_tensorboard.h5"
 file_name3 = "basic_linear_regression_model.pkl"
 
 # Save neural network
-# save_ai_model(model, file_name=file_name)
+# save_ai_model(ai_model, file_name=file_name)
 # save_tf_model(model, file_name2)
 # save_ai_model(lr_model, file_name3)
+
 
 # Load neural network
 loaded_lr_model = load_ai_model(file_name3)
@@ -281,8 +343,8 @@ predictions_lr = ai_model_evaluation(loaded_model=loaded_lr_model, x_test_=x_tes
 print("sklearn neural network model evaluation: ")
 predictions_sk = ai_model_evaluation(loaded_model=loaded_sk_model, x_test_=x_test, y_test_=y_test)
 
-# print("tensorflow neural network model evaluation: ")
-# predictions_tf = ai_model_evaluation(loaded_model=loaded_tf_model, x_test_=x_test, y_test_=y_test)
+print("tensorflow neural network model evaluation: ")
+predictions_tf = tf_model_evaluation(loaded_model=loaded_tf_model, x_test_=x_test)
 
 # visualizations for linear regression model evaluations
 figure(num=None, figsize=(8, 8), dpi=80, facecolor='w', edgecolor='k')
@@ -290,7 +352,7 @@ plt.scatter(y_test, predictions_lr)
 plt.title("Predictions v Actual Test Values For Linear Regression Model", fontsize=22)
 plt.xlabel("Actual values", fontsize=14)
 plt.ylabel("Predicted Values", fontsize=14)
-plt.show() # Should be close to a straight line
+plt.show()
 
 figure(num=None, figsize=(8, 8), dpi=80, facecolor='w', edgecolor='k')
 plt.scatter(y_test, predictions_lr - y_test)
@@ -305,11 +367,32 @@ plt.scatter(y_test, predictions_sk)
 plt.title("Predictions v Actual Test Values For Sklearn Model", fontsize=22)
 plt.xlabel("Actual values", fontsize=14)
 plt.ylabel("Predicted Values", fontsize=14)
-plt.show() # Should be close to a straight line
+plt.show()
 
 figure(num=None, figsize=(8, 8), dpi=80, facecolor='w', edgecolor='k')
 plt.scatter(y_test, predictions_sk - y_test)
 plt.title("Predictions v Actual Test Values For Sklearn Model", fontsize=22)
+plt.xlabel("Actual values", fontsize=14)
+plt.ylabel("Predicted Values", fontsize=14)
+plt.show()
+
+# some operations to calculate predictions_tf - y_test
+# converts y_test to a numpy array
+y_test = np.array(list(y_test))
+# converts predictions_tf to a numpy array
+predictions_tf = np.array(list(predictions_tf))
+
+# visualizations for sklearn model evaluations
+figure(num=None, figsize=(8, 8), dpi=80, facecolor='w', edgecolor='k')
+plt.scatter(y_test, predictions_tf)
+plt.title("Predictions v Actual Test Values For Tensorflow Model", fontsize=22)
+plt.xlabel("Actual values", fontsize=14)
+plt.ylabel("Predicted Values", fontsize=14)
+plt.show()
+
+figure(num=None, figsize=(8, 8), dpi=80, facecolor='w', edgecolor='k')
+plt.scatter(y_test, predictions_tf.flatten() - y_test.flatten())    # flatten() is a function that reduces the data dimension to 1
+plt.title("Predictions v Actual Test Values For Tensorflow Model", fontsize=22)
 plt.xlabel("Actual values", fontsize=14)
 plt.ylabel("Predicted Values", fontsize=14)
 plt.show()
