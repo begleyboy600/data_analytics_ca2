@@ -378,7 +378,7 @@ plt.show()
 correlation = np.corrcoef(data.beds, data.list_price)
 print("correlation of beds and price: ", correlation)
 
-# summary: The beds and list_price column have a correlation of 0.26256629, which means these columns are ...
+# summary: The beds and list_price column have a correlation of 0.26256629, which means these columns have little correlation
 
 # data for baths and price column
 figure(num=None, figsize=(20, 10), dpi=80, facecolor='w', edgecolor='k')
@@ -392,7 +392,8 @@ plt.show()
 correlation2 = np.corrcoef(data.baths, data.list_price)
 print("correlation of baths and price: ", correlation2)
 
-# Summary: The baths and beds column have a correlation of 0.42760621, which means these columns are ...
+# Summary: The baths and price column have a correlation of 0.42760621, which means these columns are have an even correlation
+
 figure(num=None, figsize=(20, 10), dpi=80, facecolor='w', edgecolor='k')
 plt.scatter(data.baths, data.beds, color='#2CBDFE')
 plt.title("Scatter plot of baths and beds", fontsize=22)
@@ -404,7 +405,7 @@ plt.show()
 correlation3 = np.corrcoef(data.baths, data.beds)
 print("correlation of baths and beds: ", correlation3)
 
-# summary: The baths and beds column have a correlation of 0.78879735, which means these columns are ...
+# summary: The baths and beds column have a correlation of 0.78879735, which means these columns are very correlated
 
 # Exploratory data analysis - multivariate analysis (ALL VISUALIZATIONS ARE SAVE IN data_visualizations DIRECTORY.)
 # heatmap of all variables in dataframe

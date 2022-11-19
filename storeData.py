@@ -41,5 +41,5 @@ print(data_df.head())
 # passes dataframe into a csv file called data.csv
 data_df.to_csv('data.csv', index=False, mode='a', header=False)
 
-# https://keras.io/examples/structured_data/structured_data_classification_from_scratch/
+
 

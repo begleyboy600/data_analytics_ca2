@@ -115,17 +115,23 @@ def linear_regression_model(x_train_, y_train_, x_val_, y_val_):
     -4.51249254e-10 -4.16348287e-10 2.53228239e-09]
     """
     # model y-intercept
-    print("model y-intercept: ", model.intercept_)      # output: -5.7392753660678864e-08
+    print("model y-intercept: ", model.intercept_)      # output: 2.1420419216156006e-08
 
     # predictions for the train data
     predictions_train = model.predict(x_train)
 
     raw_sum_sq_errors = sum((y_train.mean() - y_train) ** 2)
-    print("raw sum sq errors: ", raw_sum_sq_errors)    # output: 3444564380178847.5
+    print("raw sum sq errors: ", raw_sum_sq_errors)    # output: 3605125749282087.0
     prediction_sum_sq_errors = sum((predictions_train - y_train) ** 2)
 
     Rsquared_1 = 1 - prediction_sum_sq_errors / raw_sum_sq_errors
     print("r squared: ", Rsquared_1)   # r squared value: 1.0
+
+    N = len(y_train)
+    p = 21
+    Rsquared_adj1 = 1 - (1 - Rsquared_1) * (N - 1) / (N - p - 1)
+    print("Rsquared Regression Model: " + str(Rsquared_1))  # output: 1.0
+    print("Rsquared Adjusted Regression Model: " + str(Rsquared_adj1))      # output: 1.0
 
     prediction_MAE = sum(abs(predictions - y_val_)) / len(y_val_)
     prediction_MAPE = sum(abs((predictions - y_val_) / y_val_)) / len(y_val_)
@@ -218,21 +224,28 @@ def final_neural_network(layers, iterations, x_train_, y_train_, x_val_, y_val_)
     predictions_train = model.predict(x_train)
 
     raw_sum_sq_errors = sum((y_train.mean() - y_train) ** 2)
-    print("raw sum sq errors: ", raw_sum_sq_errors)     # output: 3444564380178847.5
+    print("raw sum sq errors: ", raw_sum_sq_errors)     # output: 3326256480845107.0
     prediction_sum_sq_errors = sum((predictions_train - y_train) ** 2)
 
     Rsquared_1 = 1 - prediction_sum_sq_errors / raw_sum_sq_errors
-    print("r squared: ", Rsquared_1)  # output: 0.9999999986087129
+    print("r squared: ", Rsquared_1)  # output: 0.9999999989675783
 
     prediction_MAE = sum(abs(predictions - y_val_)) / len(y_val_)
     prediction_MAPE = sum(abs((predictions - y_val_) / y_val_)) / len(y_val_)
     prediction_RMSE = (sum((predictions - y_val_) ** 2) / len(y_val_)) ** 0.5
+
+    N = len(y_train)
+    p = 21
+    Rsquared_adj1 = 1 - (1 - Rsquared_1) * (N - 1) / (N - p - 1)
+    print("Rsquared Regression Model: " + str(Rsquared_1))  # output: 0.9999999989675783
+    print("Rsquared Adjusted Regression Model: " + str(Rsquared_adj1))  # 0.9999999989502197
+
     # mae to 15 decimal places
-    print(f"mae: {prediction_MAE:.15f}")    # output: 58.666525739282186
+    print(f"mae: {prediction_MAE:.15f}")    # output: 48.309809838781256
     # mape to 15 decimal places
-    print(f"mape: {prediction_MAPE:.15f}")  # output: 0.000165970469553
+    print(f"mape: {prediction_MAPE:.15f}")  # output: 0.000143688964475
     # rmse to 15 decimal places
-    print(f"rmse: {prediction_RMSE:.15f}")  # output: 60.696292393539295
+    print(f"rmse: {prediction_RMSE:.15f}")  # output: 50.684397914466530
 
     # put predictions and actual values in a dataframe
     # df_preds = pd.DataFrame({'Actual': y_val_.squeeze(), 'Predicted': predictions.squeeze()})
@@ -310,8 +323,10 @@ def tf_model_evaluation(loaded_model, x_test_):
 # find_best_ai_architecture(x_train, y_train)
 # best neural network architecture (10, 10, 10, 10, 10, 10, 10, 10)
 
+# architecture_layers = (10, 10, 10, 10, 10, 10, 10, 10)
+
 # call linear regression, neural network and tensorflow neural network models
-#ai_model = final_neural_network(layers=(10, 10, 10, 10, 10, 10, 10, 10), iterations=500, x_train_=x_train, y_train_=y_train, x_val_=x_val, y_val_=y_val)
+# ai_model = final_neural_network(layers=architecture_layers, iterations=500, x_train_=x_train, y_train_=y_train, x_val_=x_val, y_val_=y_val)
 # model = neural_network_model_with_tf(x_train_=x_train, y_train_=y_train, x_test_=x_test, y_test_=y_test)
 # lr_model = linear_regression_model(x_train_=x_train, y_train_=y_train, x_val_=x_val, y_val_=y_val)
 
