@@ -13,8 +13,8 @@ the data:
 
 querystring = {"page":"1","state":"FL","city":"Miami","zip_code":"33149"}
 headers = {
-	"X-RapidAPI-Key": "e45e16fe17mshdee338759b8fe19p15b612jsnef7bfb3c8fe1",
-	"X-RapidAPI-Host": "mashvisor-api.p.rapidapi.com"
+	"X-RapidAPI-Key": "",
+	"X-RapidAPI-Host": ""
 }
 
 # requests response from api and stores data in response variable
